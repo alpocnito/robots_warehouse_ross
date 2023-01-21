@@ -1,84 +1,50 @@
-# Welcome to Simplified ROSS!
+# Симуляция движения роботов по складу на ROSS
 
-Welcome to a leaner, meaner, *faster* version of ROSS.
-While the entire history of ROSS has been preserved in this repository, a major change in the directory structure has made getting the full history of a file somewhat of a pain.
-You may find the now-deprecated version at the [ROSS-Legacy tag](https://github.com/ROSS-org/ROSS/releases/tag/Legacy) in this repository.
-Using this repository you can compare files from the new `ROSS/core` to `ROSS/ross`.
-For a detailed list of changes between old ROSS and SR please visit [the wiki](https://github.com/ROSS-org/ROSS/wiki/Differences-between-Simplified-ROSS-and-ROSS-Legacy).
+Библиотека позволяет симулировать алгоритм управления роем роботов на складе. Симуляция просходит на платформе ROSS, которая написана на языке С с использованием технологии MPI. Технология MPI позволет выполнять симуляция параллельно на нескольких вычислительных ядрах. 
 
-For the most recent docs and other important posts about ROSS, see the [ROSS webpage](http://ross-org.github.io).
+Платформа ROSS подробно описана [здесь](http://ross-org.github.io).
 
-[![Build Status](https://travis-ci.com/ROSS-org/ROSS.svg?branch=master)](https://travis-ci.com/ROSS-org/ROSS)
-[![codecov.io](http://codecov.io/github/ROSS-org/ROSS/coverage.svg?branch=master)](http://codecov.io/github/ROSS-org/ROSS?branch=master)
-[![Doxygen](https://img.shields.io/badge/doxygen-reference-blue.svg)](http://ross-org.github.io/ROSS-docs/docs/html)
+## Зависимости
 
-## History
+1. Компилятор языка С.
+2. Система сборки [CMake](http://cmake.org), версии 3.5 или выше.
+3. Технология MPI. Рекомендуется использовать реализацию [MPICH](http://www.mpich.org).
 
-ROSS's history starts with a one-week re-implementation of [Georgia Tech Time Warp (GTW)](http://www.cc.gatech.edu/computing/pads/tech-parallel-gtw.html) by Shawn Pearce and Dave Bauer in 1999.
-After 10 years of in-house development, version 5.0 of [Rensselaer's Optimistic Simulation System](http://sourceforge.net/projects/pdes/) went live at SourceForge.net.
-Thus the official version history began!
+## Установка
 
-Through the years ROSS has migrated from CVS, to SVN, to Git and GitHub.com.
-The code was maintained by Chris Carothers and his graduate students at RPI ([publications](http://cs.rpi.edu//~chrisc/#publications)).
-Over the years, several features (including a shared-memory version) were implemented within ROSS.
-Some of these features have since been optimized out, leaving behind cruft.
-
-In early 2015 a sleeker version of ROSS was released.
-Developed as Simplified ROSS ([gonsie/SR](http://github.com/gonsie/SR)), this version removed many files, functions, and variables that had become deprecated over time.
-
-## Requirements
-
-1. ROSS is written in C standard and thus requires a C compiler (C11 is prefered, but not required).
-2. The build system is [CMake](http://cmake.org), and we require version 3.5 or higher.
-3. ROSS relies on MPI.
-   We recommend the [MPICH](http://www.mpich.org) implementation.
-
-## Startup Instructions
-
-1. Clone the repository to your local machine:
+0. Убедитесь, что установлены все зависимости, для этого выполните данные команды
   ```
-  git clone -b master --single-branch git@github.com:ROSS-org/ROSS.git
+  mpirun --version
+  >> Version:                                 3.1.4
+  >> ...
+  
+  cmake --version
+  >> cmake version 3.12.3
+  >> ...
+  
+  gcc --version
+  >> gcc (GCC) 4.8.5 20150623 (Red Hat 4.8.5-44)
+  >> ...
+  ```
+
+1. Склонируйте репозиторий
+  ```
+  git clone https://github.com/alpocnito/robots_warehouse_ross.git
   cd ROSS
   ```
-  Since the ROSS repostiory is quite large, it is recommended that you only clone the master branch.
-  To speed up the clone command even more, use the `--depth=1` argument.
-
-2. *Optional* Install the submodules:
+2. Создайте папку build
   ```
-  git submodule init
-  git submodule update
+  mkdir build
+  cd build
   ```
-  Currently, ROSS includes one submodule:
-  - [RISA](https://github.com/ROSS-org/RISA) ROSS In Situ Analysis
-
-3. *Optional* Symlink your model to ROSS.
-Please [this blog post](https://ross-org.github.io/setup/build-model-with-ross.html) for details about creating and integrating a model with ROSS.
+3. Соберите проект
   ```
-  ln -s ~/path-to/your-existing-model models/your-model-name
+  cmake ../ -DROSS_BUILD_MODELS=ON
+  make
   ```
-
-4. Create a build directory.
-ROSS developers typically do out-of-tree builds.  See the [Installation page](https://ross-org.github.io/setup/installation.html) for more details.
+4. Запустите симуляцию
   ```
-  cd ~/directory-of-builds/
-  mkdir ROSS-build
-  cd ROSS-build
-  ccmake ~/path-to/ROSS
+  cd models/robots_warehouse/
+  ./model --robots=10
   ```
-
-5. Make your model(s) with one of the following commands
-  ```
-  make -k         // ignore errors from other models
-  make -j 12      // parallel build
-  make model-name // build only one model
-  ```
-
-6. Run your model.
-See [this blog post](https://ross-org.github.io/setup/running-sim.html) for details about the ROSS command line options.
-  ```
-  cd ~/directory-of-builds/ROSS-build/models/your-model
-  ./your-model --synch=1               // sequential mode
-  mpirun -np 2 ./your-model --synch=2  // conservative mode
-  mpirun -np 2 ./your-model --synch=3  // optimistic mode
-  ./your-model --synch=4               // optimistic debug mode (note: not a parallel execution!)
-  ```
+  Где --robots=10 означет, что в симуляции будет использовано 10 робото.
